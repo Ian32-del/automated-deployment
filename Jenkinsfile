@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'docker:24.0.7'   // Docker CLI image
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
 
     environment {
         DOCKER_IMAGE = "christopherian2004/devops-backend"
@@ -34,7 +39,6 @@ pipeline {
         stage('Load Image into Minikube') {
             steps {
                 sh '''
-                # Ensure image is available inside Minikube
                 minikube image load $FULL_IMAGE
                 '''
             }
