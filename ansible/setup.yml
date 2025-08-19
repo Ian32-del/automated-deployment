@@ -1,0 +1,15 @@
+---
+- name: Initial playbook setup
+  hosts: local
+  become: yes
+  tasks:
+    - name: Update apt packages 
+      apt:
+        update_cache: yes
+        
+    - name: Install basic tools
+      apt:
+        name:
+          - git
+          - curl
+        state: present

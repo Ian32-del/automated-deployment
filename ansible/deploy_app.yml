@@ -1,0 +1,46 @@
+---
+- name: Deploy Node.js + MongoDB app with Docker
+  hosts: local
+  become: yes
+  tasks:
+    - name: Ensure Docker is installed
+      apt:
+        name: docker-ce
+        state: present
+        update_cache: yes
+
+    - name: Create named Docker volume
+      community.docker.docker_volume:
+        name: mongo_data
+
+    - name: Build backend Docker image
+      community.docker.docker_image:
+        name: devops-backend
+        source: build
+        build:
+          path: /home/chris/DevOps/Ansible-project/automated-deployment/app/backend
+        state: present
+
+    - name: Run MongoDB container
+      community.docker.docker_container:
+        name: mongo
+        image: mongo:5
+        state: started
+        restart_policy: always
+        ports:
+          - "27018:27017"
+        volumes:
+          - mongo_data:/data/db
+
+    - name: Run Backend container
+      community.docker.docker_container:
+        name: backend
+        image: devops-backend
+        state: started
+        restart_policy: always
+        ports:
+          - "3000:3000"
+        env:
+          MONGO_URL: mongodb://mongo:27017/devopsdb
+        links:
+          - mongo
